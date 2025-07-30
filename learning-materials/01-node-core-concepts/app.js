@@ -5,7 +5,6 @@ const fs = require('fs');
 const filePath = path.join(__dirname, 'message.txt');
 
 const server = http.createServer((req, res) => {
-  console.log(req.url, req.method, req.headers);
   const url = req.url;
   const method = req.method;
   if (url === '/') {
@@ -18,7 +17,17 @@ const server = http.createServer((req, res) => {
     return res.end();
   }
   if (url === '/message' && method === 'POST') {
-    fs.writeFileSync(filePath, 'DUMMY');
+    const body = [];
+    req.on('data', (chunk) => {
+      console.log(chunk);
+      body.push(chunk);
+    });
+    req.on('end', () => {
+      const parsedBody = Buffer.concat(body).toString();
+      const message = parsedBody.split('=')[1];
+      fs.writeFileSync(filePath, message);
+    });
+
     res.writeHead(302, { Location: '/' });
     return res.end();
   }
