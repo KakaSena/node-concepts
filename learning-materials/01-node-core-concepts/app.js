@@ -19,15 +19,15 @@ const server = http.createServer((req, res) => {
   if (url === '/message' && method === 'POST') {
     const body = [];
     req.on('data', (chunk) => {
-      console.log(chunk);
       body.push(chunk);
     });
-    req.on('end', () => {
+    return req.on('end', () => {
       const parsedBody = Buffer.concat(body).toString();
       const message = parsedBody.split('=')[1];
-      fs.writeFileSync(filePath, message);
-      res.writeHead(302, { Location: '/' });
-      return res.end();
+      fs.writeFile(filePath, message, (err) => {
+        res.writeHead(302, { Location: '/' });
+        return res.end();
+      });
     });
   }
 
